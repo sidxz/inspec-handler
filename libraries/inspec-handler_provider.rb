@@ -1,3 +1,4 @@
+require "json"
 class Chef
   class Provider
     class InspecHandler < Chef::Provider
@@ -23,6 +24,42 @@ class Chef
       def action_disable
       end
 
+
+      #Helper Methods
+      def is_test_kitchen?
+        res = shell_out_compact!("getent", "passwd", "vagrant", returns[0, 1, 2]).stdout
+        Chef::Log.warn(res);
+      end
+
+      def run_noninteractive(*args)
+        shell_out_compact!(*args)
+      end
+
+      def fetch_test_list()
+        paths = Array.new
+        if is_test_kitchen? then
+          # To get runlist parse /tmp/chef/dna.json
+          Chef::Log.warn("Using Test Kitchen: Will Parse /tmp/chef/dna.json for runlist")
+          string = File.read('/tmp/kitchen/dna.json')
+          parsed = JSON.parse(string)
+          parsed["run_list"].each do |k|
+            k.slice!(0,7)       #Remove recipe[
+            k = k.chop          #Remove ] 
+            k = k.sub("::","/") 
+            paths.push(k)
+          end
+        else
+          # Will use node.runlist
+          node.run_list.recipe_names.each do |k|
+            if !k.include? "::" then
+              paths.push(k+"/"+"default.rb")
+            else
+              paths.push(k.sub("::","/"))
+            end
+          end
+        end
+        return path
+      end
 
     end
   end
