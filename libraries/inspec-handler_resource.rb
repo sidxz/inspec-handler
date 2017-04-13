@@ -1,12 +1,13 @@
+require 'chef/resource'
 class Chef
   class Resource
     class InspecHandler < Chef::Resource
 
-      provides :inspec-handler, :on_platforms => :all
+      provides :inspec_handler , :on_platforms => :all
 
      def initialize(name, run_context=nil)
        super
-       @resource_name = :inspec-handler
+       @resource_name = :inspec_handler
        @allowed_actions = [:run, :enable, :disable]
        @action = :run
 

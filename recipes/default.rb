@@ -5,5 +5,5 @@
 # Copyright:: 2017, The Authors, All Rights Reserved.
 #
 #
-inspec-handler "all-tests" do
+inspec_handler "all-tests" do
 end
