@@ -1,9 +1,33 @@
+##
+# Author:: Siddhant Rath (<sid@tamu.edu>)
+# License:: Apache License, Version 2.0
+#
+#       http://www.github.com/sidxz/
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##
+
 require "json"
 require "mixlib/shellout"
 class Chef
   class Provider
     class InspecHandler < Chef::Provider
-     include Chef::Mixin::ShellOut 
+      ##
+      #
+      # This HWRP Provides a way to automatically run a set of inspec tests at the end of chef-client run.
+      # /!\ IMPORTANT: This cookbook should be the LAST in your runlist
+      #
+      ##
       def whyrun_supported?
         true
       end
@@ -44,6 +68,14 @@ class Chef
       #Helper Methods
 
       def generate_test_stack
+        ##
+        #
+        # This method generates the test stack that will be run by inspec
+        # An example of output Stack is ["/etc/chef/inspec-handler/cookbook1/test1.rb, "/etc/chef/inspec-handler/cookbook2/tesxtx.rb"]
+        # This stack is created during runtime by parsing the run list so as to run only those tests who have a recipe entry 
+        # in the run list. method fetch_test_list does the backend fetching.
+        #
+        ##
         enforced = current_resource.enforced
         runPath = current_resource.run_path
         testList = fetch_test_list
@@ -60,7 +92,6 @@ class Chef
             if enforced
               # Raise Error and quit
               Chef::Log.warn("/!\\ INSPEC HANDLER TESTING IS ENFORCED. To automatically skip unavailable inspec tests, set enforce to false")
-              #Chef::Application.fatal!("Test #{runPath}/#{itest}.rb NOT found")
               raise "InspecHandler : Test #{runPath}/#{itest}.rb NOT found. Corresponding recipe is found in run-list!"
             end  
           end
@@ -70,7 +101,6 @@ class Chef
       
       def is_test_kitchen?
         #res = shell_out_compact!("getent", "passwd", "vagrant", returns: [0, 1, 2]).stdout
-        #res = shell_out_compact!("getent", "passwd", "vagrant").stdout
         res = shell_out_command("getent", "passwd", "vagrant", returns: [0, 1, 2]).stdout
         Chef::Log.warn(res);
         (res == 0)? (return true): (return false);
@@ -81,6 +111,11 @@ class Chef
       end
 
       def fetch_test_list()
+        ##
+        #
+        # Parse run list for chef-client or /tmp/chef/dna.json for test-kitchen and build an array of active recipes
+        #
+        ##
         paths = Array.new
         if is_test_kitchen? then
           # To get runlist parse /tmp/chef/dna.json
