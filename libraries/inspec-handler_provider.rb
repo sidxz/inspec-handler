@@ -36,7 +36,7 @@ class Chef
           if raise_on_fail then
              shell_out!("inspec", "exec", t,  :live_stream => STDOUT)
           else
-              shell_out("inspec", "exec", t,  :live_stream => STDOUT)
+             shell_out("inspec", "exec", t,  :live_stream => STDOUT)
           end 
         end
       end
