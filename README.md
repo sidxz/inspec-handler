@@ -1,4 +1,4 @@
-# Inspec handler
+# Inspec Handler
 Use inspec_handler resource to automatically run a set of inspec tests in the client's machine at the last phase of the chef-client run.
 
 # Usage
@@ -27,3 +27,17 @@ where
 * enforced will enforce a rule that enforces each recipe that exists in the runlist to have a corresponding inspec test suite inside run_path. By default this is set to true. The chef client-run will fail if a missing test suite is detected. Set this to false to revoke the restriction.
 
 # Actions
+This resource has the following actions:
+```ruby
+:hard_run
+```
+This runs all the defined tests and raises / fails chef client-run (converge) if any of the test fails
+```ruby
+:soft_run
+```
+It warns, but does not fail a chef client-run if the inspec tests fail
+
+# Motivation
+
+# Examples
+
