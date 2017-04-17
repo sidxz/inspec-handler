@@ -8,13 +8,14 @@ class Chef
      def initialize(name, run_context=nil)
        super
        @resource_name = :inspec_handler
-       @allowed_actions = [:run, :enable, :disable]
-       @action = :run
+       @allowed_actions = [:hard_run, :soft_run]
+       @action = :hard_run
 
        #resource defaults
        @name = name;
-       @run_path = "/etc/chef/inspec-tests/"
+       @run_path = "/etc/chef/inspec-tests"
        @log_path = "/var/logs/inspec-handler.log"
+       @enforced = true
      end
 
      #Methods to get and set attributes
@@ -28,6 +29,10 @@ class Chef
 
      def log_path(arg=nil)
        set_or_return(:log_path, arg, :kind_of => String)
+     end
+
+     def enforced(arg=nil)
+       set_or_return(:enforced, arg, :kind_of => [TrueClass, FalseClass])
      end
 
     end

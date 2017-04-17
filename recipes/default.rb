@@ -6,4 +6,6 @@
 #
 #
 inspec_handler "all-tests" do
+  enforced false
+  action [:hard_run]
 end
