@@ -56,11 +56,11 @@ class Chef
       def run_tests(raise_on_fail)
         testStack = generate_test_stack
         testStack.each do |t|
-          Chef::Log.warn("TEST INSPEC:: #{t}")
+          Chef::Log.warn("Running INSPEC:: #{t}")
           if raise_on_fail then
-             shell_out!("inspec", "exec", t,  :live_stream => STDOUT)
+             shell_out!("inspec", "exec", t, :live_stream => STDOUT)
           else
-             shell_out("inspec", "exec", t,  :live_stream => STDOUT)
+             shell_out ("inspec", "exec", t, :live_stream => STDOUT)
           end 
         end
       end

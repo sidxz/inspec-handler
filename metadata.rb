@@ -1,6 +1,6 @@
 name 'inspec_handler'
-maintainer 'The Authors'
-maintainer_email 'you@example.com'
+maintainer 'COE-IT,Texas A&M U'
+maintainer_email 'sid@tamu.edu'
 license 'all_rights'
 description 'Installs/Configures inspec_handler'
 long_description 'Installs/Configures inspec_handler'
@@ -16,4 +16,4 @@ issues_url 'https://github.com/sidxz/inspec-handler/issues' if respond_to?(:issu
 # `View Source` link will be displayed on this cookbook's page when uploaded to
 # a Supermarket.
 #
-source_url 'https://github.com/sidxz>/inspec-handler' if respond_to?(:source_url)
+source_url 'https://github.com/sidxz/inspec-handler' if respond_to?(:source_url)
