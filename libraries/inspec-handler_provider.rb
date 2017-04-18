@@ -57,11 +57,9 @@ class Chef
         testStack = generate_test_stack
         testStack.each do |t|
           Chef::Log.warn("Running INSPEC:: #{t}")
-          if raise_on_fail then
-             shell_out!("inspec", "exec", t, :live_stream => STDOUT)
-          else
-             shell_out ("inspec", "exec", t, :live_stream => STDOUT)
-          end 
+          cmd = Mixlib::ShellOut.new("inspec exec #{t}", :live_stream => STDOUT)
+          cmd.run_command
+          if raise_on_fail then cmd.error! end
         end
       end
 
@@ -132,7 +130,7 @@ class Chef
           # Will use node.runlist
           node.run_list.recipe_names.each do |k|
             if !k.include? "::" then
-              paths.push(k+"/"+"default.rb")
+              paths.push(k+"/"+"default")
             else
               paths.push(k.sub("::","/"))
             end
