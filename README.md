@@ -41,14 +41,15 @@ It warns, but does not fail a chef client-run if the inspec tests fail
 During a hard run, if tests detect any failure, the handler raises an error to abort the Chef execution. This error can be captured by any other exception handler and be treated like any other error in the Chef execution.
 
 # Usage
-This project was initiated to leverage the power of Inspec to perform smoke and integration test in chef automate's CI/CD pipeline. 
-This avoids sharing of ssh keys of privileged users in between runner and client node. The Inspec tests are performed directly on the client node during the chef converge phase. 
-In general, this is used in conjunction with the chef-generator-cookbook that automatically creates a basic template for these tests. 
-Using this generator cookbook, when a cookbook is created using the 'chef generate cookbook' command, it creates a corresponding Inspec test template (for default recipe) placed at templates/default/inspec-tests/default.rb.
-This is repeated when a new recipe is added using the 'chef generate recipe' command.  It also injects some code to the recipes, so as to copy these test files to a specific location to the client node, from where inspec_handler will run these tests. (which is again defined by the run_path property).
-The idea is to run an Inspec test per recipe. 
-When this is run together with multiple cookbooks, Inspec Handler parses the run list and sequentially runs these tests.
-Since Inspec test files are created using templates of cookbooks, data bags and chef variables can also be used.
-This provides a good way to perform smoke and integration testing using Inspec in the client node while going through chef automate's CI/CD pipeline, or in general, can be used to automatically test the infrastructure during a client run.
+This project was initiated to leverage the power of Inspec to perform smoke and integration test in chef automate's CI/CD pipeline.   
+This avoids sharing of ssh keys of privileged users in between runner and client node. The Inspec tests are performed directly on the client node during the chef converge phase.  
+In general, this is used in conjunction with the chef-generator-cookbook(https://github.com/sidxz/chef-code-generator) that automatically creates a basic template for these tests.   
+Using this generator cookbook, when a cookbook is created using the 'chef generate cookbook' command, it creates a corresponding Inspec test template (for default recipe) placed at templates/default/inspec-tests/default.rb.  
+This is repeated when a new recipe is added using the 'chef generate recipe' command.  It also injects some code to the recipes, so as to copy these test files to a specific location to the client node, from where inspec_handler will run these tests. (which is again defined by the run_path property).  
+The idea is to run an Inspec test per recipe.  
+When this is run together with multiple cookbooks, Inspec Handler parses the run list and sequentially runs these tests.  
+Since Inspec test files are created using templates of cookbooks, data bags and chef variables can also be used.  
+This provides a good way to perform smoke and integration testing using Inspec in the client node while going through chef automate's CI/CD pipeline, or in general, can be used to automatically test the infrastructure during a client run.  
+__NOTE: This cookbook should be placed at the end of your runlist.__
 
 
