@@ -37,6 +37,9 @@ This runs all the defined tests and raises / fails chef client-run (converge) if
 ```
 It warns, but does not fail a chef client-run if the inspec tests fail
 
+# Automatic Chef Failure
+During a hard run if ests detect any failure, the handler raises an error to abort the Chef execution. This error can be captured by any other exception handler and be treated like any other error in the Chef execution.
+
 # Motivation
 
 # Examples
