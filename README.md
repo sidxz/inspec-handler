@@ -2,7 +2,7 @@
 Use inspec_handler resource to automatically run a set of inspec tests in the client's machine at the last phase of the chef-client run.
 
 # Usage
-inspec_handler resource  in your cookbook will run all the inspec tests for all the recipes that exists in your run list.
+inspec_handler resource in your cookbook will run all the inspec tests for all the recipes that exist in your run list.
 These tests are placed in the client node at a certain directory defined by the run_path.
 
 ```ruby
@@ -24,21 +24,21 @@ where
 * inspec_handler is the resource
 * run_path is the dir in which inspec test suites reside. The tests inside this dir is arranged by cookbook-name/recipe-name.rb. recipe-name.rb contains inspec test code for the corresponding recipe.
 * log_path is a file where the logs will be stored.
-* enforced will enforce a rule that enforces each recipe that exists in the runlist to have a corresponding inspec test suite inside run_path. By default this is set to true. The chef client-run will fail if a missing test suite is detected. Set this to false to revoke the restriction.
+* enforced will enforce a rule that enforces each recipe that exists in the runlist to have a corresponding inspec test suite inside run_path. By default, this is set to true. The chef client-run will fail if a missing test suite is detected. Set this to false to revoke the restriction.
 
 # Actions
 This resource has the following actions:
 ```ruby
 :hard_run
 ```
-This runs all the defined tests and raises / fails chef client-run (converge) if any of the test fails
+This runs all the defined tests and raises/fails chef client-run (converge) if any of the test fails
 ```ruby
 :soft_run
 ```
 It warns, but does not fail a chef client-run if the inspec tests fail
 
 # Automatic Chef Failure
-During a hard run if tests detect any failure, the handler raises an error to abort the Chef execution. This error can be captured by any other exception handler and be treated like any other error in the Chef execution.
+During a hard run, if tests detect any failure, the handler raises an error to abort the Chef execution. This error can be captured by any other exception handler and be treated like any other error in the Chef execution.
 
 # Usage
 This project was initiated to leverage the power of Inspec to perform smoke and integration test in chef automate's CI/CD pipeline. 
