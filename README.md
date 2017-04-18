@@ -40,7 +40,7 @@ It warns, but does not fail a chef client-run if the inspec tests fail
 # Automatic Chef Failure
 During a hard run, if tests detect any failure, the handler raises an error to abort the Chef execution. This error can be captured by any other exception handler and be treated like any other error in the Chef execution.
 
-# Usage
+# About
 This project was initiated to leverage the power of Inspec to perform smoke and integration test in chef automate's CI/CD pipeline.   
 This avoids sharing of ssh keys of privileged users in between runner and client node. The Inspec tests are performed directly on the client node during the chef converge phase.  
 In general, this is used in conjunction with the chef-generator-cookbook(https://github.com/sidxz/chef-code-generator) that automatically creates a basic template for these tests.   
