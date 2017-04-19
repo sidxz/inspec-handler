@@ -136,6 +136,8 @@ class Chef
             end
           end
         end
+        #Remove inspec handler cookbook from test list
+        if paths.include? "inspec_handler/default" then paths.delete("inspec_handler/default") end
         return paths
       end
 
