@@ -77,6 +77,10 @@ class Chef
        set_or_return(:blacklist, arg, :kind_of => Array)
      end
 
+     def environment(arg=nil)
+       set_or_return(:environment, arg, :kind_of => Array)
+     end
+
 
     end
   end

@@ -41,6 +41,7 @@ class Chef
         @current_resource.enforced(new_resource.enforced)
         @current_resource.whitelist(new_resource.whitelist)
         @current_resource.blacklist(new_resource.blacklist)
+        @current_resource.environment(new_resource.environment)
       end
 
       #Action Methods
@@ -58,6 +59,18 @@ class Chef
     
       #Actions
       def run_tests(raise_on_fail)
+        ##
+        #
+        #Environment Filter
+        #
+        ##
+        if current_resource.environment != nil then
+          if !current_resource.environment.include? node.chef_environment then
+            Chef::Log.warn("Inspec Handler Skipped Tests due to environment filter. Environment: #{node.chef_environment}")
+            return true 
+          end
+        end
+
         testStack = generate_test_stack
         testStack.each do |t|
           Chef::Log.warn("Running INSPEC:: #{t}")
@@ -66,6 +79,7 @@ class Chef
           if raise_on_fail then cmd.error! end
         end
         ##############EXPERIMENTS####################
+        Chef::Log.warn("ENVIRONMENT #{node.chef_environment}")
         #cookbooks = run_context.parent_run_context
         #cookbooks = run_list.run_list_items
         #cookbooks = run_context.cookbook_collection
