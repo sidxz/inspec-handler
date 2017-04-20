@@ -17,14 +17,18 @@ inspec_handler 'name' do
   run_path              String
   log_path              String
   enforced              TrueClass, FalseClass
+  whitelist             Array
+  blacklist             Array
   action                Symbol, :hard_run if not specified
 end
 ```
 where
-* inspec_handler is the resource
-* run_path is the dir in which inspec test suites reside. The tests inside this dir is arranged by cookbook-name/recipe-name.rb. recipe-name.rb contains inspec test code for the corresponding recipe.
-* log_path is a file where the logs will be stored.
-* enforced will enforce a rule that enforces each recipe that exists in the runlist to have a corresponding inspec test suite inside run_path. By default, this is set to true. The chef client-run will fail if a missing test suite is detected. Set this to false to revoke the restriction.
+* __inspec_handler__ is the resource
+* __run_path__ is the dir in which inspec test suites reside. The tests inside this dir is arranged by cookbook-name/recipe-name.rb. recipe-name.rb contains inspec test code for the corresponding recipe.
+* __log_path__ is a file where the logs will be stored.
+* __enforced__ will enforce a rule that enforces each recipe that exists in the runlist to have a corresponding inspec test suite inside run_path. By default, this is set to true. The chef client-run will fail if a missing test suite is detected. Set this to false to revoke the restriction.
+* __whitelist__ is a white spaced array, if defined, inspec handler will run test suites for them. This will override the runlist. In other words, inspec handler will only run test suites for the whitelist array. example whitelist %w(cookbook1::default cookbook2::install)
+* __blacklist__ is a white spaced array that removes the defined recipes from the test suite array. Tests for these recipes will be skipped from the run list. 
 
 # Actions
 This resource has the following actions:
