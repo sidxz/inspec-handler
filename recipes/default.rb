@@ -6,8 +6,11 @@
 #
 #
 inspec_handler "all-tests" do
-  run_path '/opt/coe/inspec-tests'
-  enforced false
-  environment nil 
-  action [:hard_run]
+  run_path      node['inspec_handler']['run_path']
+  log_path      node['inspec_handler']['log_path']
+  enforced      node['inspec_handler']['enforced']
+  whitelist     node['inspec_handler']['whitelist']
+  blacklist     node['inspec_handler']['blacklist']
+  environment   node['inspec_handler']['environment']
+  action        node['inspec_handler']['action']
 end
