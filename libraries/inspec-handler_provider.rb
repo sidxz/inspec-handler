@@ -42,9 +42,11 @@ class Chef
         @current_resource.whitelist(new_resource.whitelist)
         @current_resource.blacklist(new_resource.blacklist)
         @current_resource.environment(new_resource.environment)
-      end
+      end                       
 
+      ####################################################################################
       #Action Methods
+      ####################################################################################
 
       def action_hard_run
         run_tests(true)
@@ -57,7 +59,9 @@ class Chef
       def action_disable
       end
     
+      ####################################################################################
       #Actions
+      ####################################################################################
       def run_tests(raise_on_fail)
         ##
         #
@@ -71,6 +75,11 @@ class Chef
           end
         end
 
+        ##
+        #
+        #Get test stack and run inspec for each 
+        #
+        ### 
         testStack = generate_test_stack
         testStack.each do |t|
           Chef::Log.warn("Running INSPEC:: #{t}")
@@ -78,19 +87,12 @@ class Chef
           cmd.run_command
           if raise_on_fail then cmd.error! end
         end
-        ##############EXPERIMENTS####################
-        Chef::Log.warn("ENVIRONMENT #{node.chef_environment}")
-        #cookbooks = run_context.parent_run_context
-        #cookbooks = run_list.run_list_items
-        #cookbooks = run_context.cookbook_collection
-        #Chef::Log.warn(cookbooks)
-        #Chef::Log.warn("Cookbooks and versions run: #{cookbooks.keys.map {|x| cookbooks[x].name + ' ' + cookbooks[x].version} }")
-        #Chef::Log.warn(JSON.pretty_generate(cookbooks))
-
       end
 
-      #Helper Methods
 
+      ######################################################################################  
+      #Helper Methods
+      ######################################################################################
       def generate_test_stack
         ##
         #
@@ -99,23 +101,27 @@ class Chef
         # This stack is created during runtime by parsing the run list so as to run only those tests who have a recipe entry 
         # in the run list. method fetch_test_list does the backend fetching.
         #
+        # /!\ Might RAISE if test file is not present 
         ##
         enforced = current_resource.enforced
         runPath = current_resource.run_path
         testList = fetch_test_list
-        Chef::Log.warn(testList)
         testStack = Array.new
-        # Check if test files exists for each recipe
+
         testList.each do |itest|
-          #See if file exists
+          ##
+          #
+          # See if file exists
           # enforced => raise error and quit
           # not enforced => by pass in test stack
+          #
+          ##
           if ::File.exists?("#{runPath}/#{itest}.rb") then
             testStack.push("#{runPath}/#{itest}.rb")
           else
             Chef::Log.warn("/!\\ File #{runPath}/#{itest} NOT found")
             if enforced
-              # Raise Error and quit
+              # Raise and quit
               Chef::Log.warn("/!\\ INSPEC HANDLER TESTING IS ENFORCED. To automatically skip unavailable inspec tests, set enforce to false")
               raise "InspecHandler : Test #{runPath}/#{itest}.rb NOT found. Corresponding recipe is found in run-list!"
             end  
@@ -127,7 +133,6 @@ class Chef
       def is_test_kitchen?
         #res = shell_out_compact!("getent", "passwd", "vagrant", returns: [0, 1, 2]).stdout
         res = shell_out_command("getent", "passwd", "vagrant", returns: [0, 1, 2]).stdout
-        Chef::Log.warn(res);
         (res == 0)? (return true): (return false);
       end
 

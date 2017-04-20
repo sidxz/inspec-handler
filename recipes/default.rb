@@ -8,6 +8,6 @@
 inspec_handler "all-tests" do
   run_path '/opt/coe/inspec-tests'
   enforced false
-  environment %w(_quality)
+  environment nil 
   action [:hard_run]
 end
