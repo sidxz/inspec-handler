@@ -69,6 +69,15 @@ class Chef
        set_or_return(:enforced, arg, :kind_of => [TrueClass, FalseClass])
      end
 
+     def whitelist(arg=nil)
+       set_or_return(:whitelist, arg, :kind_of => Array)
+     end
+
+     def blacklist(arg=nil)
+       set_or_return(:blacklist, arg, :kind_of => Array)
+     end
+
+
     end
   end
 end 
