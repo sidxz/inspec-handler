@@ -39,7 +39,7 @@ class Chef
        ##
        #run_path : Directory in the client node where inspec tests are placed
        #           Tests must be arranged in <cookbook_name>/<recipe_name>.rb inside run path dir
-       #log_path : TODO /!\ Not implemented
+       #log_path : dir in which logs will be generated
        #enforced : Enforces a restriction binding a compulsary test for each recipe that exists in runlist.
        #           In other words, All recipes that exists in the client run list must have a corresponding test
        #           in <run_path>/<cookbookname>/<recipe_name>.rb. If this file is missing, it will result in a run time fail. 
@@ -49,6 +49,7 @@ class Chef
        @name = name;
        @run_path = "/etc/chef/inspec-tests"
        @log_path = "/var/logs/inspec-handler.log"
+       @log_shift_age = 10
        @enforced = true
      end
 
@@ -79,6 +80,10 @@ class Chef
 
      def environment(arg=nil)
        set_or_return(:environment, arg, :kind_of => Array)
+     end
+
+     def log_shift_age(arg=nil)
+       set_or_return(:log_shift_age, arg, :kind_of => String)
      end
 
 
