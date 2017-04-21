@@ -8,6 +8,7 @@
 inspec_handler "all-tests" do
   run_path      node['inspec_handler']['run_path']
   log_path      node['inspec_handler']['log_path']
+  log_shift_age node['inspec_handler']['log_shift_age']
   enforced      node['inspec_handler']['enforced']
   whitelist     node['inspec_handler']['whitelist']
   blacklist     node['inspec_handler']['blacklist']

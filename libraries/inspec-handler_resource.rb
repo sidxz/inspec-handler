@@ -49,6 +49,7 @@ class Chef
        @name = name;
        @run_path = "/etc/chef/inspec-tests"
        @log_path = "/var/logs/inspec-handler.log"
+       @log_shift_age = 10
        @enforced = true
      end
 
@@ -79,6 +80,10 @@ class Chef
 
      def environment(arg=nil)
        set_or_return(:environment, arg, :kind_of => Array)
+     end
+
+     def log_shift_age(arg=nil)
+       set_or_return(:log_shift_age, arg, :kind_of => String)
      end
 
 

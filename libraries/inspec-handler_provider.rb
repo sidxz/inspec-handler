@@ -19,6 +19,7 @@
 
 require "json"
 require "mixlib/shellout"
+require "logger"
 #require "chef/handler"
 #require "chef/run_status"
 class Chef
@@ -38,6 +39,7 @@ class Chef
         @current_resource = Chef::Resource::InspecHandler.new(new_resource.name)
         @current_resource.run_path(new_resource.run_path)
         @current_resource.log_path(new_resource.log_path)
+        @current_resource.log_shift_age(new_resource.log_shift_age)
         @current_resource.enforced(new_resource.enforced)
         @current_resource.whitelist(new_resource.whitelist)
         @current_resource.blacklist(new_resource.blacklist)
@@ -74,7 +76,6 @@ class Chef
             return true 
           end
         end
-
         ##
         #
         #Get test stack and run inspec for each 
@@ -85,6 +86,7 @@ class Chef
           Chef::Log.warn("Running INSPEC:: #{t}")
           cmd = Mixlib::ShellOut.new("inspec exec #{t}", :live_stream => STDOUT)
           cmd.run_command
+          if cmd.error? then generate_log cmd end
           if raise_on_fail then cmd.error! end
         end
       end
@@ -208,6 +210,19 @@ class Chef
           return (recipe.sub("::","/"))
         end
       end
+
+      ##
+      #
+      # LOGGING
+      #
+      ##
+      def generate_log(message)
+        ::FileUtils.mkdir_p(current_resource.log_path) unless ::File.directory?(current_resource.log_path)
+        logger = Logger.new("#{current_resource.log_path}/error.log", current_resource.log_shift_age.to_i, 'daily')
+        logger.error (message)
+        logger.close
+      end
+
 
     end
   end
