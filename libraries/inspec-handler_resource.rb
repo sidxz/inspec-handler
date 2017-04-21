@@ -39,7 +39,7 @@ class Chef
        ##
        #run_path : Directory in the client node where inspec tests are placed
        #           Tests must be arranged in <cookbook_name>/<recipe_name>.rb inside run path dir
-       #log_path : TODO /!\ Not implemented
+       #log_path : dir in which logs will be generated
        #enforced : Enforces a restriction binding a compulsary test for each recipe that exists in runlist.
        #           In other words, All recipes that exists in the client run list must have a corresponding test
        #           in <run_path>/<cookbookname>/<recipe_name>.rb. If this file is missing, it will result in a run time fail. 

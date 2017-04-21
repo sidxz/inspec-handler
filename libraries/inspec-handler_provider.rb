@@ -82,6 +82,7 @@ class Chef
         #
         ### 
         testStack = generate_test_stack
+
         testStack.each do |t|
           Chef::Log.warn("Running INSPEC:: #{t}")
           cmd = Mixlib::ShellOut.new("inspec exec #{t}", :live_stream => STDOUT)
