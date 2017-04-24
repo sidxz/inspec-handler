@@ -14,13 +14,14 @@ inspec_handler "Run Active Tests" do
 The full syntax for all the properties that are available to the inspec_handler resource is:
 ```ruby
 inspec_handler 'name' do
-  run_path              String
-  log_path              String
-  log_shift_age         String
-  enforced              TrueClass, FalseClass
-  whitelist             Array
-  blacklist             Array
-  environment           Array
+  run_path                String
+  log_path                String
+  log_shift_age           String
+  enforced                TrueClass, FalseClass
+  whitelist               Array
+  blacklist               Array
+  environment             Array
+  production_environment  String
   action                Symbol, :hard_run if not specified
 end
 ```
@@ -33,7 +34,7 @@ where
 * __whitelist__ is a white spaced array, if defined, inspec handler will run test suites for them. This will override the runlist. In other words, inspec handler will only run test suites for the whitelist array. example whitelist %w(cookbook1::default cookbook2::install)
 * __blacklist__ is a white spaced array that removes the defined recipes from the test suite array. Tests for these recipes will be skipped from the run list. 
 * __environment__ is a white spaced array, when defined will restrict the inspec handler to run only in the defined environments. By default inspec handlers runs in all environment.
-
+* __production_environment__ defines your production environment in which inspec_handler will run only if there is a change in the runlist. If this is not set, all the inspec_tests are run on each chef-client run.
 # Actions
 This resource has the following actions:
 ```ruby
