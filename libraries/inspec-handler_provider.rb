@@ -44,6 +44,7 @@ class Chef
         @current_resource.whitelist(new_resource.whitelist)
         @current_resource.blacklist(new_resource.blacklist)
         @current_resource.environment(new_resource.environment)
+        @current_resource.production_environment(new_resource.production_environment)
       end                       
 
       ####################################################################################
@@ -65,24 +66,37 @@ class Chef
       #Actions
       ####################################################################################
       def run_tests(raise_on_fail)
+
         ##
         #
-        #Environment Filter
+        # Generate Test Stack
         #
         ##
-        if current_resource.environment != nil then
-          if !current_resource.environment.include? node.chef_environment then
-            Chef::Log.warn("Inspec Handler Skipped Tests due to environment filter. Environment: #{node.chef_environment}")
+        testStack = generate_test_stack
+
+        ##
+        #
+        # Filters
+        # 
+        ##
+        if node.environment == current_resource.production_environment then
+          if !run_at_prod? testStack then
+            Chef::Log.warn("Inspec Handler Skipped Tests due to Production Environment Filter. Environment: #{node.chef_environment}. There is No change in runlist")
+           return true 
+         end
+        else
+          if block_filter_env? then
+            Chef::Log.warn("Inspec Handler Skipped Tests due to Environment Filter. Environment: #{node.chef_environment}")
             return true 
           end
         end
+        
         ##
         #
-        #Get test stack and run inspec for each 
+        # Execute inspec tests
         #
         ### 
-        testStack = generate_test_stack
-
+        
         testStack.each do |t|
           Chef::Log.warn("Running INSPEC:: #{t}")
           cmd = Mixlib::ShellOut.new("inspec exec #{t}", :live_stream => STDOUT)
@@ -90,6 +104,7 @@ class Chef
           if cmd.error? then generate_log cmd end
           if raise_on_fail then cmd.error! end
         end
+
       end
 
 
@@ -223,6 +238,52 @@ class Chef
         logger.error (message)
         logger.close
       end
+
+      ##
+      #
+      #Production restriction: Will run the test only if there is a change in run list
+      #
+      ##
+      def diff_run_list?(testStack)
+        ::FileUtils.mkdir_p("/var/lib/inspec_handler/cache/") unless ::File.directory?("/var/lib/inspec-handler/cache/")
+        cache = ::File.open("/var/lib/inspec_handler/cache/runlist", ::File::RDWR | ::File::CREAT, 750)
+        cache_content = cache.read
+        cookbooks = run_context.cookbook_collection
+        gen_runlist = "#{cookbooks.keys.map {|x| cookbooks[x].name + ' ' + cookbooks[x].version}} #{testStack.to_s}"
+        if !gen_runlist.eql? cache_content then 
+          cache.close
+          cache = ::File.open("/var/lib/inspec_handler/cache/runlist", ::File::RDWR | ::File::TRUNC | ::File::CREAT, 750)
+          cache.write(gen_runlist)
+          Chef::Log.warn("/!\\ Change in Runlist Detected")
+          cache.close
+          return true
+        else
+          return false
+        end
+      end
+
+      ##
+      #
+      # FILTERS
+      #
+      ##
+      def block_filter_env?
+        if ((current_resource.environment != nil) && (!current_resource.environment.include? node.chef_environment))
+            return true
+          else
+            return false
+          end
+      end
+
+      def run_at_prod?(testStack)
+        if ((current_resource.production_environment != nil) && (node.chef_environment == current_resource.production_environment) && (diff_run_list?(testStack)))
+            return true
+          else
+            return false
+          end
+      end
+
+
 
 
     end
