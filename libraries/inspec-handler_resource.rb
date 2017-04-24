@@ -51,6 +51,7 @@ class Chef
        @log_path = "/var/logs/inspec-handler.log"
        @log_shift_age = 10
        @enforced = true
+       @production_environment = nil
      end
 
      #Methods to get and set attributes
@@ -86,6 +87,9 @@ class Chef
        set_or_return(:log_shift_age, arg, :kind_of => String)
      end
 
+     def production_environment(arg=nil)
+       set_or_return(:production_environment, arg, :kind_of => String)
+     end
 
     end
   end
