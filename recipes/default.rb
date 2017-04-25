@@ -5,6 +5,11 @@
 # Copyright:: 2017, The Authors, All Rights Reserved.
 #
 #
+
+# Install inspec
+gem_package 'inspec'
+
+# Start inspec handler
 inspec_handler "all-tests" do
   run_path                      node['inspec_handler']['run_path']
   log_path                      node['inspec_handler']['log_path']
