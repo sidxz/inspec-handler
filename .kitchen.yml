@@ -22,7 +22,6 @@ suites:
   - name: default
     run_list:
       - recipe[inspec_handler::default]
-      - recipe[inspec_handler::test2]
     verifier:
       inspec_tests:
         - test/smoke/default
