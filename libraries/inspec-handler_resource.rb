@@ -23,7 +23,8 @@ class Chef
   class Resource
     class InspecHandler < Chef::Resource
 
-      provides :inspec_handler , :on_platforms => :all
+      #provides :inspec_handler , :on_platforms => :all
+      provides :inspec_handler
 
      def initialize(name, run_context=nil)
        super

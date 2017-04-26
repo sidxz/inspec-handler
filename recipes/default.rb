@@ -6,9 +6,6 @@
 #
 #
 
-# Install inspec
-gem_package 'inspec'
-
 # Start inspec handler
 inspec_handler "all-tests" do
   run_path                      node['inspec_handler']['run_path']

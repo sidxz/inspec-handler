@@ -31,6 +31,7 @@ class Chef
       # /!\ IMPORTANT: This cookbook should be the LAST in your runlist
       #
       ##
+      provides :inspec_handler
       def whyrun_supported?
         true
       end
