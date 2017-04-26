@@ -245,7 +245,7 @@ class Chef
       #
       ##
       def diff_run_list?(testStack)
-        ::FileUtils.mkdir_p("/var/lib/inspec_handler/cache/") unless ::File.directory?("/var/lib/inspec-handler/cache/")
+        ::FileUtils.mkdir_p("/var/lib/inspec_handler/cache/") unless ::File.directory?("/var/lib/inspec_handler/cache/")
         cache = ::File.open("/var/lib/inspec_handler/cache/runlist", ::File::RDWR | ::File::CREAT, 750)
         cache_content = cache.read
         cookbooks = run_context.cookbook_collection
