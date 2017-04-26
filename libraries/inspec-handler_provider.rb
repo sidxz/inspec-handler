@@ -194,7 +194,7 @@ class Chef
 
           ##--> CHEF-CLIENT <--
           # Will use node.runlist
-          node.run_list.recipe_names.each do |recipe|
+          node["expanded_run_list"].each do |recipe|
               paths.push(convert_recipe_to_path recipe)
           end
         end
