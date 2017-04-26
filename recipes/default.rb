@@ -14,7 +14,7 @@ inspec_handler "all-tests" do
   enforced                      node['inspec_handler']['enforced']
   whitelist                     node['inspec_handler']['whitelist']
   blacklist                     node['inspec_handler']['blacklist']
-  environment                   node['inspec_handler']['environment']
+  test_environment              node['inspec_handler']['test_environment']
   production_environment        node['inspec_handler']['production_environment']
   action  node['inspec_handler']['action']
 end
