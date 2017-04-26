@@ -44,7 +44,7 @@ class Chef
         @current_resource.enforced(new_resource.enforced)
         @current_resource.whitelist(new_resource.whitelist)
         @current_resource.blacklist(new_resource.blacklist)
-        @current_resource.environment(new_resource.environment)
+        @current_resource.test_environment(new_resource.test_environment)
         @current_resource.production_environment(new_resource.production_environment)
       end                       
 
@@ -269,7 +269,7 @@ class Chef
       #
       ##
       def block_filter_env?
-        if ((current_resource.environment != nil) && (!current_resource.environment.include? node.chef_environment))
+        if ((current_resource.test_environment != nil) && (!current_resource.test_environment.include? node.chef_environment))
             return true
           else
             return false

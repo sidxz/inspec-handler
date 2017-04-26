@@ -20,7 +20,7 @@ inspec_handler 'name' do
   enforced                TrueClass, FalseClass
   whitelist               Array
   blacklist               Array
-  environment             Array
+  test_environment        Array
   production_environment  String
   action                Symbol, :hard_run if not specified
 end
@@ -31,9 +31,9 @@ where
 * __log_path__ is a file where the logs will be stored.
 * __log_shift_age__ Number of days for which log files will be kept (default 10). Logs are rotated daily.
 * __enforced__ will enforce a rule that enforces each recipe that exists in the runlist to have a corresponding inspec test suite inside run_path. By default, this is set to true. The chef client-run will fail if a missing test suite is detected. Set this to false to revoke the restriction.
-* __whitelist__ is a white spaced array, if defined, inspec handler will run test suites for them. This will override the runlist. In other words, inspec handler will only run test suites for the whitelist array. example whitelist %w(cookbook1::default cookbook2::install)
-* __blacklist__ is a white spaced array that removes the defined recipes from the test suite array. Tests for these recipes will be skipped from the run list. 
-* __environment__ is a white spaced array, when defined will restrict the inspec handler to run only in the defined environments. By default inspec handlers runs in all environment.
+* __whitelist__ is an array, if defined, inspec handler will run test suites for them. This will override the runlist. In other words, inspec handler will only run test suites for the whitelist array. example whitelist %w(cookbook1::default cookbook2::install)
+* __blacklist__ is an array that removes the defined recipes from the test suite array. Tests for these recipes will be skipped from the run list. 
+* __test_environment__ is an array, when defined will restrict the inspec handler to run only in the defined test environments. By default inspec handlers runs in all environment.
 * __production_environment__ defines your production environment in which inspec_handler will run only if there is a change in the runlist. If this is not set, all the inspec_tests are run on each chef-client run.
 # Actions
 This resource has the following actions:
