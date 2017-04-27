@@ -122,13 +122,29 @@ class Chef
         # Execute inspec tests
         #
         ### 
+        abort_on_fail = current_resource.abort_on_fail
         
-        testStack.each do |t|
-          Chef::Log.warn("Running INSPEC:: #{t}")
-          cmd = Mixlib::ShellOut.new("inspec exec #{t}", :live_stream => STDOUT)
-          cmd.run_command
-          if cmd.error? then generate_log cmd end
-          if raise_on_fail then cmd.error! end
+        # Set local var has_error = false
+        has_error = false
+
+        # Define tmp_log to hold log string
+        tmp_log = ""
+        error_log =""
+        
+        begin
+          testStack.each do |t|
+            Chef::Log.warn("Running INSPEC:: #{t}")
+            cmd = Mixlib::ShellOut.new("inspec exec #{t}", :live_stream => STDOUT)
+            cmd.run_command
+           
+            if cmd.error? then tmp_log+=tmp_log; has_error = true; error_log+=cmd.error  end
+            if (abort_on_fail && has_error) then raise "Aborted" end
+        end
+        rescue
+
+        ensure
+          generate_log tmp_log
+          if (raise_on_fail && has_error) then raise error_log end
         end
 
       end
