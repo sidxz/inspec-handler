@@ -46,7 +46,32 @@ class Chef
         @current_resource.blacklist(new_resource.blacklist)
         @current_resource.test_environment(new_resource.test_environment)
         @current_resource.production_environment(new_resource.production_environment)
-      end                       
+        @current_resource.abort_on_fail(new_resource.abort_on_fail)
+        _string_builder()
+      end
+
+      ####################################################################################
+      # STRINGS
+      ####################################################################################
+      def _string_builder()
+        # C O R E
+        @_string_mod_name = "Inspec Handler"
+        @_string_warning = "[/!\\]"
+        @_string_fail = "[--FAIL--]"
+        @_string_fatal = "[--FATAL--]"
+
+        # Funcrion run_tests
+        @_string_production_filter = "[No Change in RunList] Filter: Production Environment is set. Skipping Tests. "
+        @_string_test_env_filter   = "[#{node.chef_environment} not in test environment set] Filter : Test Environment is set. Skipping Tests "
+        #Function generate_test_stack
+        @_string_file_not_found = "[File Not Found] "
+        @_string_enforced_warning = "[Testing is Enforced] To skip unavailable tests, set property 'enforce' to false"
+        @_string_enforced_raise = "[Test Not Found] Recipe is present in runlist. Expected test file to be at "
+        #Function is_test_kitchen?
+        @_string_kitchen = "[Test Kitchen Detected] Will parse /tmp/chef/dna.json to create runlist"
+        #Function diff_run_list?
+        @_string_diff_run_list = "[Runlist Changed] Runlist has been modified or a cookbook has changed its version."
+      end
 
       ####################################################################################
       #Action Methods
@@ -82,12 +107,12 @@ class Chef
         ##
         if node.environment == current_resource.production_environment then
           if !run_at_prod? testStack then
-            Chef::Log.warn("Inspec Handler Skipped Tests due to Production Environment Filter. Environment: #{node.chef_environment}. There is No change in runlist")
+            Chef::Log.warn("#{@_string_mod_name} #{@_string_production_filter}")
            return true 
          end
         else
           if block_filter_env? then
-            Chef::Log.warn("Inspec Handler Skipped Tests due to Environment Filter. Environment: #{node.chef_environment}")
+            Chef::Log.warn("#{@_string_mod_name} #{@_string_test_env_filter}")
             return true 
           end
         end
@@ -138,11 +163,11 @@ class Chef
           if ::File.exists?("#{runPath}/#{itest}.rb") then
             testStack.push("#{runPath}/#{itest}.rb")
           else
-            Chef::Log.warn("/!\\ File #{runPath}/#{itest} NOT found")
+            Chef::Log.warn("#{@_string_mod_name} #{@_string_warning} #{@_string_file_not_found} #{runPath}/#{itest} ")
             if enforced
               # Raise and quit
-              Chef::Log.warn("/!\\ INSPEC HANDLER TESTING IS ENFORCED. To automatically skip unavailable inspec tests, set enforce to false")
-              raise "InspecHandler : Test #{runPath}/#{itest}.rb NOT found. Corresponding recipe is found in run-list!"
+              Chef::Log.warn("#{@_string_mod_name} #{@_string_enforced_warning}")
+              raise "#{@_string_mod_name} #{@_string_fatal} #{@_string_enforced_raise} #{runPath}/#{itest}.rb"
             end  
           end
         end
@@ -182,7 +207,7 @@ class Chef
         ##--> TEST KITCHEN --<
         if is_test_kitchen? then
           # To get runlist parse /tmp/chef/dna.json
-          Chef::Log.warn("Using Test Kitchen: Will Parse /tmp/chef/dna.json for runlist")
+          Chef::Log.warn("#{@_string_mod_name} #{@_string_kitchen}")
           string = File.read('/tmp/kitchen/dna.json')
           parsed = JSON.parse(string)
           parsed["run_list"].each do |k|
@@ -255,7 +280,7 @@ class Chef
           cache.close
           cache = ::File.open("/var/lib/inspec_handler/cache/runlist", ::File::RDWR | ::File::TRUNC | ::File::CREAT, 750)
           cache.write(gen_runlist)
-          Chef::Log.warn("/!\\ Change in Runlist Detected")
+          Chef::Log.warn("#{@_string_mod_name} #{@_string_diff_run_list}")
           cache.close
           return true
         else
@@ -283,9 +308,6 @@ class Chef
             return false
           end
       end
-
-
-
 
     end
   end
