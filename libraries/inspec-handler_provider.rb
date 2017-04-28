@@ -55,7 +55,7 @@ class Chef
       ####################################################################################
       def _string_builder()
         # C O R E
-        @_string_mod_name = "Inspec Handler"
+        @_string_mod_name = "[Inspec Handler]"
         @_string_warning = "[/!\\]"
         @_string_fail = "[--FAIL--]"
         @_string_fatal = "[--FATAL--]"
@@ -63,6 +63,7 @@ class Chef
         # Funcrion run_tests
         @_string_production_filter = "[No Change in RunList] Filter: Production Environment is set. Skipping Tests. "
         @_string_test_env_filter   = "[#{node.chef_environment} not in test environment set] Filter : Test Environment is set. Skipping Tests "
+        @_string_start_time = "[Testing Started At #{Time.new.strftime('%c')}] "
         #Function generate_test_stack
         @_string_file_not_found = "[File Not Found] "
         @_string_enforced_warning = "[Testing is Enforced] To skip unavailable tests, set property 'enforce' to false"
@@ -127,9 +128,8 @@ class Chef
         # Set local var has_error = false
         has_error = false
 
-        # Define tmp_log to hold log string
-        tmp_log = ""
-        error_log =""
+        # Variable to hold log string
+        error_log = "#{@_string_mod_name} #{@_string_start_time}"
         
         begin
           testStack.each do |t|
@@ -137,13 +137,13 @@ class Chef
             cmd = Mixlib::ShellOut.new("inspec exec #{t}", :live_stream => STDOUT)
             cmd.run_command
            
-            if cmd.error? then tmp_log+=tmp_log; has_error = true; error_log+=cmd.error  end
+            if cmd.error? then has_error = true; error_log << cmd.stdout  end
             if (abort_on_fail && has_error) then raise "Aborted" end
         end
         rescue
 
         ensure
-          generate_log tmp_log
+          if (has_error) then generate_log error_log end
           if (raise_on_fail && has_error) then raise error_log end
         end
 
@@ -275,10 +275,24 @@ class Chef
       #
       ##
       def generate_log(message)
+        ##
+        #
+        # Rotating Log Files
+        #
+        ##
         ::FileUtils.mkdir_p(current_resource.log_path) unless ::File.directory?(current_resource.log_path)
-        logger = Logger.new("#{current_resource.log_path}/error.log", current_resource.log_shift_age.to_i, 'daily')
+        logger = ::Logger.new("#{current_resource.log_path}/#{current_resource.name.downcase.tr(' ', '_')}_error.log", 'daily', current_resource.log_shift_age.to_i)
+        ::File.chmod(0440, "#{current_resource.log_path}/#{current_resource.name.downcase.tr(' ', '_')}_error.log")
         logger.error (message)
         logger.close
+        ##
+        #
+        # Record last failure in a separate file
+        #
+        ##
+        last_run_with_error = ::File.open("#{current_resource.log_path}/#{current_resource.name.downcase.tr(' ', '_')}_last_error.log", ::File::RDWR | ::File::TRUNC | ::File::CREAT, 0440)
+        last_run_with_error.write(message)
+        last_run_with_error.close
       end
 
       ##

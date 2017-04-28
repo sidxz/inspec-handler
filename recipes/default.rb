@@ -7,7 +7,7 @@
 #
 
 # Start inspec handler
-inspec_handler "all-tests" do
+inspec_handler "inspec_tests" do
   run_path                      node['inspec_handler']['run_path']
   log_path                      node['inspec_handler']['log_path']
   log_shift_age                 node['inspec_handler']['log_shift_age']
