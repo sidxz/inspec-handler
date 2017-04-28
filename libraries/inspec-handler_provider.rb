@@ -46,7 +46,36 @@ class Chef
         @current_resource.blacklist(new_resource.blacklist)
         @current_resource.test_environment(new_resource.test_environment)
         @current_resource.production_environment(new_resource.production_environment)
-      end                       
+        @current_resource.abort_on_fail(new_resource.abort_on_fail)
+        _string_builder()
+      end
+
+      ####################################################################################
+      # STRINGS
+      ####################################################################################
+      def _string_builder()
+        # C O R E
+        @_string_mod_name = "[Inspec Handler]"
+        @_string_warning = "[/!\\]"
+        @_string_fail = "[--FAIL--]"
+        @_string_fatal = "[--FATAL--]"
+
+        # Funcrion run_tests
+        @_string_production_filter = "[No Change in RunList] Filter: Production Environment is set. Skipping Tests. "
+        @_string_test_env_filter   = "[#{node.chef_environment} not in test environment set] Filter : Test Environment is set. Skipping Tests "
+        @_string_start_time = "[Testing Started At #{Time.new.strftime('%c')}] "
+        @_string_rescue_on_abort = "Further testing has been aborted. To change this behavior, modify property 'abort_on_fail' to false."
+        #Function generate_test_stack
+        @_string_file_not_found = "[File Not Found] "
+        @_string_enforced_warning = "[Testing is Enforced] To skip unavailable tests, set property 'enforce' to false"
+        @_string_enforced_raise = "[Test Not Found] Recipe is present in runlist. Expected test file to be at "
+        #Function is_test_kitchen?
+        @_string_kitchen = "[Test Kitchen Detected] Will parse /tmp/chef/dna.json to create runlist"
+        #Function diff_run_list?
+        @_string_diff_run_list = "[Runlist Changed] Runlist has been modified or a cookbook has changed its version."
+        #Function run_at_prod?
+        @_string_last_fail ="[Fail detected in last run] Will Override Production Filter "
+      end
 
       ####################################################################################
       #Action Methods
@@ -82,12 +111,12 @@ class Chef
         ##
         if node.environment == current_resource.production_environment then
           if !run_at_prod? testStack then
-            Chef::Log.warn("Inspec Handler Skipped Tests due to Production Environment Filter. Environment: #{node.chef_environment}. There is No change in runlist")
+            Chef::Log.warn("#{@_string_mod_name} #{@_string_production_filter}")
            return true 
          end
         else
           if block_filter_env? then
-            Chef::Log.warn("Inspec Handler Skipped Tests due to Environment Filter. Environment: #{node.chef_environment}")
+            Chef::Log.warn("#{@_string_mod_name} #{@_string_test_env_filter}")
             return true 
           end
         end
@@ -97,15 +126,34 @@ class Chef
         # Execute inspec tests
         #
         ### 
+        abort_on_fail = current_resource.abort_on_fail
         
-        testStack.each do |t|
-          Chef::Log.warn("Running INSPEC:: #{t}")
-          cmd = Mixlib::ShellOut.new("inspec exec #{t}", :live_stream => STDOUT)
-          cmd.run_command
-          if cmd.error? then generate_log cmd end
-          if raise_on_fail then cmd.error! end
-        end
+        # Set local var has_error = false
+        has_error = false
 
+        # Variable to hold log string
+        error_log = "#{@_string_mod_name} #{@_string_start_time}"
+        
+        begin
+          testStack.each do |t|
+            Chef::Log.warn("#{@_string_mod_name} Running INSPEC:: #{t}")
+            cmd = Mixlib::ShellOut.new("inspec exec #{t}", :live_stream => STDOUT)
+            cmd.run_command
+           
+            if cmd.error? then has_error = true; error_log << cmd.stdout  end
+            if (abort_on_fail && has_error) then raise "Aborted" end
+          end
+        rescue
+            Chef::Log.warn("#{@_string_mod_name} #{@_string_fail} #{@_string_rescue_on_abort}")
+        else
+        # If run suceeds at prod set 'inspec_handler_last_success' to true
+            if (is_at_prod?) then node.normal['inspec_handler_last_success'] = true end
+        ensure
+          if (has_error) then generate_log error_log end
+          if (raise_on_fail && has_error) then raise error_log end
+          if (is_at_prod? && has_error) then node.normal['inspec_handler_last_success'] = false end
+        end
+        
       end
 
 
@@ -138,11 +186,11 @@ class Chef
           if ::File.exists?("#{runPath}/#{itest}.rb") then
             testStack.push("#{runPath}/#{itest}.rb")
           else
-            Chef::Log.warn("/!\\ File #{runPath}/#{itest} NOT found")
+            Chef::Log.warn("#{@_string_mod_name} #{@_string_warning} #{@_string_file_not_found} #{runPath}/#{itest} ")
             if enforced
               # Raise and quit
-              Chef::Log.warn("/!\\ INSPEC HANDLER TESTING IS ENFORCED. To automatically skip unavailable inspec tests, set enforce to false")
-              raise "InspecHandler : Test #{runPath}/#{itest}.rb NOT found. Corresponding recipe is found in run-list!"
+              Chef::Log.warn("#{@_string_mod_name} #{@_string_enforced_warning}")
+              raise "#{@_string_mod_name} #{@_string_fatal} #{@_string_enforced_raise} #{runPath}/#{itest}.rb"
             end  
           end
         end
@@ -182,7 +230,7 @@ class Chef
         ##--> TEST KITCHEN --<
         if is_test_kitchen? then
           # To get runlist parse /tmp/chef/dna.json
-          Chef::Log.warn("Using Test Kitchen: Will Parse /tmp/chef/dna.json for runlist")
+          Chef::Log.warn("#{@_string_mod_name} #{@_string_kitchen}")
           string = File.read('/tmp/kitchen/dna.json')
           parsed = JSON.parse(string)
           parsed["run_list"].each do |k|
@@ -234,10 +282,24 @@ class Chef
       #
       ##
       def generate_log(message)
+        ##
+        #
+        # Rotating Log Files
+        #
+        ##
         ::FileUtils.mkdir_p(current_resource.log_path) unless ::File.directory?(current_resource.log_path)
-        logger = Logger.new("#{current_resource.log_path}/error.log", current_resource.log_shift_age.to_i, 'daily')
+        logger = ::Logger.new("#{current_resource.log_path}/#{current_resource.name.downcase.tr(' ', '_')}_error.log", 'daily', current_resource.log_shift_age.to_i)
+        ::File.chmod(0440, "#{current_resource.log_path}/#{current_resource.name.downcase.tr(' ', '_')}_error.log")
         logger.error (message)
         logger.close
+        ##
+        #
+        # Record last failure in a separate file
+        #
+        ##
+        last_run_with_error = ::File.open("#{current_resource.log_path}/#{current_resource.name.downcase.tr(' ', '_')}_last_error.log", ::File::RDWR | ::File::TRUNC | ::File::CREAT, 0440)
+        last_run_with_error.write(message)
+        last_run_with_error.close
       end
 
       ##
@@ -255,7 +317,7 @@ class Chef
           cache.close
           cache = ::File.open("/var/lib/inspec_handler/cache/runlist", ::File::RDWR | ::File::TRUNC | ::File::CREAT, 750)
           cache.write(gen_runlist)
-          Chef::Log.warn("/!\\ Change in Runlist Detected")
+          Chef::Log.warn("#{@_string_mod_name} #{@_string_diff_run_list}")
           cache.close
           return true
         else
@@ -277,15 +339,28 @@ class Chef
       end
 
       def run_at_prod?(testStack)
-        if ((current_resource.production_environment != nil) && (node.chef_environment == current_resource.production_environment) && (diff_run_list?(testStack)))
+        # Check if node attribute is set
+        if !node.attribute?('inspec_handler_last_success')
+          node.normal['inspec_handler_last_success'] = false;
+        end
+        
+        if (is_at_prod? && node.normal['inspec_handler_last_success'] == false)
+          Chef::Log.warn("#{@_string_mod_name} #{@_string_warning} #{@_string_last_fail}")
+        end
+        if ((is_at_prod?) && ((node.normal['inspec_handler_last_success'] == false) || (diff_run_list?(testStack))))
             return true
           else
             return false
           end
       end
 
-
-
+      def is_at_prod?
+        if ((current_resource.production_environment != nil) && (node.chef_environment == current_resource.production_environment))
+          return true
+        else
+          return false
+        end
+      end
 
     end
   end
