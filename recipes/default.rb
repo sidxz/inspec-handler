@@ -12,6 +12,7 @@ inspec_handler "inspec_tests" do
   log_path                      node['inspec_handler']['log_path']
   log_shift_age                 node['inspec_handler']['log_shift_age']
   enforced                      node['inspec_handler']['enforced']
+  abort_on_fail                 node['inspec_handler']['abort_on_fail']
   whitelist                     node['inspec_handler']['whitelist']
   blacklist                     node['inspec_handler']['blacklist']
   test_environment              node['inspec_handler']['test_environment']

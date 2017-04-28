@@ -50,7 +50,7 @@ class Chef
        #test_environment : If defined will restrict the inspec handler to run only in the defined test environments.
        #production_environment : defines your production environment in which inspec_handler will run only if there
        #           is a change in the runlist. If this is not set, all the inspec_tests are run on each chef-client run.
-       #abort_on_fail : Will fail teh chef client immediately if one of the test fails
+       #abort_on_fail : Will skip further tests if one of the test fails
        #
        ##
 
@@ -61,6 +61,7 @@ class Chef
        @log_shift_age = 10
        @enforced = true
        @production_environment = nil
+       @abort_on_fail = true
      end
 
      #Methods to get and set attributes
