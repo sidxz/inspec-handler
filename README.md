@@ -34,7 +34,7 @@ where
 * __whitelist__ is an array, if defined, inspec handler will run test suites for them. This will override the runlist. In other words, inspec handler will only run test suites for the whitelist array. example whitelist %w(cookbook1::default cookbook2::install)
 * __blacklist__ is an array that removes the defined recipes from the test suite array. Tests for these recipes will be skipped from the run list. 
 * __test_environment__ is an array, when defined will restrict the inspec handler to run only in the defined test environments. By default inspec handlers runs in all environment.
-* __production_environment__ defines your production environment in which inspec_handler will run only if there is a change in the runlist. If this is not set, all the inspec_tests are run on each chef-client run.
+* __production_environment__ defines your production environment in which inspec_handler will run only if there is a change in the runlist, a cookbook version has changed, or a fail is setected in last run. If this is not set, all the inspec_tests are run on each chef-client run. NOTE: If a test fails in production environment, inspec handler will continue running in subsequent client runs untill all tests are passed.
 # Actions
 This resource has the following actions:
 ```ruby
