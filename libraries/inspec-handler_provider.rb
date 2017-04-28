@@ -73,6 +73,8 @@ class Chef
         @_string_kitchen = "[Test Kitchen Detected] Will parse /tmp/chef/dna.json to create runlist"
         #Function diff_run_list?
         @_string_diff_run_list = "[Runlist Changed] Runlist has been modified or a cookbook has changed its version."
+        #Function run_at_prod?
+        @_string_last_fail ="[Fail detected in last run] Will Override Production Filter "
       end
 
       ####################################################################################
@@ -134,20 +136,24 @@ class Chef
         
         begin
           testStack.each do |t|
-            Chef::Log.warn("Running INSPEC:: #{t}")
+            Chef::Log.warn("#{@_string_mod_name} Running INSPEC:: #{t}")
             cmd = Mixlib::ShellOut.new("inspec exec #{t}", :live_stream => STDOUT)
             cmd.run_command
            
             if cmd.error? then has_error = true; error_log << cmd.stdout  end
             if (abort_on_fail && has_error) then raise "Aborted" end
-        end
+          end
         rescue
             Chef::Log.warn("#{@_string_mod_name} #{@_string_fail} #{@_string_rescue_on_abort}")
+        else
+        # If run suceeds at prod set 'inspec_handler_last_success' to true
+            if (is_at_prod?) then node.normal['inspec_handler_last_success'] = true end
         ensure
           if (has_error) then generate_log error_log end
           if (raise_on_fail && has_error) then raise error_log end
+          if (is_at_prod? && has_error) then node.normal['inspec_handler_last_success'] = false end
         end
-
+        
       end
 
 
@@ -333,11 +339,27 @@ class Chef
       end
 
       def run_at_prod?(testStack)
-        if ((current_resource.production_environment != nil) && (node.chef_environment == current_resource.production_environment) && (diff_run_list?(testStack)))
+        # Check if node attribute is set
+        if !node.attribute?('inspec_handler_last_success')
+          node.normal['inspec_handler_last_success'] = false;
+        end
+        
+        if (is_at_prod? && node.normal['inspec_handler_last_success'] == false)
+          Chef::Log.warn("#{@_string_mod_name} #{@_string_warning} #{@_string_last_fail}")
+        end
+        if ((is_at_prod?) && ((node.normal['inspec_handler_last_success'] == false) || (diff_run_list?(testStack))))
             return true
           else
             return false
           end
+      end
+
+      def is_at_prod?
+        if ((current_resource.production_environment != nil) && (node.chef_environment == current_resource.production_environment))
+          return true
+        else
+          return false
+        end
       end
 
     end
