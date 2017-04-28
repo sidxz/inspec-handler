@@ -64,6 +64,7 @@ class Chef
         @_string_production_filter = "[No Change in RunList] Filter: Production Environment is set. Skipping Tests. "
         @_string_test_env_filter   = "[#{node.chef_environment} not in test environment set] Filter : Test Environment is set. Skipping Tests "
         @_string_start_time = "[Testing Started At #{Time.new.strftime('%c')}] "
+        @_string_rescue_on_abort = "Further testing has been aborted. To change this behavior, modify property 'abort_on_fail' to false."
         #Function generate_test_stack
         @_string_file_not_found = "[File Not Found] "
         @_string_enforced_warning = "[Testing is Enforced] To skip unavailable tests, set property 'enforce' to false"
@@ -141,7 +142,7 @@ class Chef
             if (abort_on_fail && has_error) then raise "Aborted" end
         end
         rescue
-
+            Chef::Log.warn("#{@_string_mod_name} #{@_string_fail} #{@_string_rescue_on_abort}")
         ensure
           if (has_error) then generate_log error_log end
           if (raise_on_fail && has_error) then raise error_log end
