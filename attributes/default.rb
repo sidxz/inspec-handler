@@ -2,6 +2,7 @@ default['inspec_handler']['run_path'] = "/opt/coe/inspec-tests"
 default['inspec_handler']['log_path'] = "/var/log/inspec_handler" 
 default['inspec_handler']['log_shift_age'] = "10" 
 default['inspec_handler']['enforced'] = false
+default['inspec_handler']['abort_on_fail'] = false
 default['inspec_handler']['whitelist']= nil
 default['inspec_handler']['blacklist']= nil
 default['inspec_handler']['test_environment']= nil

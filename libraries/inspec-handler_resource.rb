@@ -57,7 +57,7 @@ class Chef
        #resource defaults
        @name = name;
        @run_path = "/etc/chef/inspec-tests"
-       @log_path = "/var/logs/inspec-handler.log"
+       @log_path = "/var/log/inspec_handler"
        @log_shift_age = 10
        @enforced = true
        @production_environment = nil

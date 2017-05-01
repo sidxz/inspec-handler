@@ -289,7 +289,7 @@ class Chef
         ##
         ::FileUtils.mkdir_p(current_resource.log_path) unless ::File.directory?(current_resource.log_path)
         logger = ::Logger.new("#{current_resource.log_path}/#{current_resource.name.downcase.tr(' ', '_')}_error.log", 'daily', current_resource.log_shift_age.to_i)
-        ::File.chmod(0440, "#{current_resource.log_path}/#{current_resource.name.downcase.tr(' ', '_')}_error.log")
+        ::File.chmod(0640, "#{current_resource.log_path}/#{current_resource.name.downcase.tr(' ', '_')}_error.log")
         logger.error (message)
         logger.close
         ##
@@ -297,7 +297,7 @@ class Chef
         # Record last failure in a separate file
         #
         ##
-        last_run_with_error = ::File.open("#{current_resource.log_path}/#{current_resource.name.downcase.tr(' ', '_')}_last_error.log", ::File::RDWR | ::File::TRUNC | ::File::CREAT, 0440)
+        last_run_with_error = ::File.open("#{current_resource.log_path}/#{current_resource.name.downcase.tr(' ', '_')}_last_error.log", ::File::RDWR | ::File::TRUNC | ::File::CREAT, 0640)
         last_run_with_error.write(message)
         last_run_with_error.close
       end
