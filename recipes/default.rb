@@ -17,5 +17,6 @@ inspec_handler "inspec_tests" do
   blacklist                     node['inspec_handler']['blacklist']
   test_environment              node['inspec_handler']['test_environment']
   production_environment        node['inspec_handler']['production_environment']
-  action  node['inspec_handler']['action']
+  action :nothing
+  delayed_action  node['inspec_handler']['action']
 end
