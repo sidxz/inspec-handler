@@ -34,7 +34,7 @@ class Chef
        # Soft Run will continue with the chef run by displaying warnings
        ## 
        @resource_name = :inspec_handler
-       @allowed_actions = [:hard_run, :soft_run]
+       @allowed_actions = [:hard_run, :soft_run, :nothing]
        @action = :hard_run
 
        ##
