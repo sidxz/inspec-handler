@@ -50,6 +50,40 @@ It warns, but does not fail a chef client-run if the inspec tests fail
 
 # Automatic Chef Failure
 During a hard run, if tests detect any failure, the handler raises an error to abort the Chef execution. This error can be captured by any other exception handler and be treated like any other error in the Chef execution.
+# Inspec Handler Utils
+This cookbook also provides helper utils
+## Ensure that the inspec handler cookbook is the last one to be run
+We recommend to implement this using a wrapper cookbook.
+Add the following resource 
+```
+inspec_handler_utils do
+  ensure_last true
+  action :hard
+end
+```
+where
+* __ensure_last__ will ensure that the tests are being run at the last step of convergence
+* __:action__ (:hard, :soft) :hard will fail the chef-client if one of the property fails. :soft will only generate warning
+
+An example wrapper cookbook :
+`cookbook name` coe-inspec-handler
+file metadata.rb
+```
+name 'coe-inspec-handler'
+<other params>
+depends "inspec_handler"
+```
+file recipe/default.rb
+```
+inspec_handler_utils "inutil" do
+  ensure_last true
+  action :hard
+end
+
+include_recipe "inspec_handler::default"
+```
+
+
 
 # About
 This project was initiated to leverage the power of Inspec to perform smoke and integration test in chef automate's CI/CD pipeline.   

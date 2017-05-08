@@ -38,7 +38,7 @@ class Chef
 
       def load_current_resource
         @current_resource = Chef::Resource::InspecHandlerUtils.new(new_resource.name)
-        @current_resource.ensure_last_cookbook(new_resource.ensure_last_cookbook)
+        @current_resource.ensure_last(new_resource.ensure_last)
         _string_builder()
       end
 
@@ -51,17 +51,20 @@ class Chef
         @_string_warning = "[/!\\]"
         @_string_fail = "[--FAIL--]"
         @_string_fatal = "[--FATAL--]"
+
+        #is_at_end
+        @_string_is_at_end_error = "#{cookbook_name} is NOT placed at the end of your runlist. Make sure this cookbook runs last."
       end
 
       ####################################################################################
       #Action Methods
       ####################################################################################
 
-      def action_hard_run
+      def action_hard
         utils(true)
       end
 
-      def action_soft_run
+      def action_soft
         utils(false)
       end
 
@@ -69,12 +72,17 @@ class Chef
       #Actions
       ####################################################################################
       def utils(raise_on_fail)
-      is_at_end?
+
+        if @current_resource.ensure_last then is_at_end? (raise_on_fail) end
         
       end
 
-      def is_at_end?
-        Chef::Log.warn("NAME OF COOKBOOK : #{cookbook_name}")
+      def is_at_end? (raise_on_fail)
+        Chef::Log.warn("NAME OF WRAPPER COOKBOOK : #{cookbook_name}")
+        if !node["expanded_run_list"].last.include? cookbook_name
+          if raise_on_fail then raise "#{@_string_mod_name} #{@_string_fatal} #{@_string_is_at_end_error}" end
+          if !raise_on_fail then Chef::Log.warn("#{@_string_mod_name} #{@_string_warning} #{@_string_is_at_end_error}") end
+        end
         return true
       end
 

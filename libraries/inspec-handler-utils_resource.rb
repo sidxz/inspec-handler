@@ -34,8 +34,8 @@ class Chef
        # Soft Run will continue with the chef run by displaying warnings
        ## 
        @resource_name = :inspec_handler_utils
-       @allowed_actions = [:hard_run, :soft_run]
-       @action = :hard_run
+       @allowed_actions = [:hard, :soft]
+       @action = :hard
 
        ##
        # ensure_last : ensure that this is the last thing in the runlist
@@ -43,15 +43,15 @@ class Chef
 
        #resource defaults
        @name = name;
-       @ensure_last_cookbook = true
+       @ensure_last = false 
      end
 
      def name(arg=nil)
        set_or_return(:name, arg, :kind_of => String)
      end
 
-     def ensure_last_cookbook(arg=nil)
-       set_or_return(:ensure_last_cookbook, arg, :kind_of => [TrueClass, FalseClass])
+     def ensure_last(arg=nil)
+       set_or_return(:ensure_last, arg, :kind_of => [TrueClass, FalseClass])
      end
 
     end
