@@ -17,6 +17,9 @@ inspec_handler "inspec_tests" do
   blacklist                     node['inspec_handler']['blacklist']
   test_environment              node['inspec_handler']['test_environment']
   production_environment        node['inspec_handler']['production_environment']
-#  action :nothing
-  delayed_action  node['inspec_handler']['action']
+  action :nothing
+end
+
+log 'execute' do
+  notifies node['inspec_handler']['action'], 'inspec_handler[inspec_tests]', :delayed
 end

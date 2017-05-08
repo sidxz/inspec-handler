@@ -89,7 +89,7 @@ class Chef
         run_tests(false)
       end
 
-      def action_disable
+      def action_nothing
       end
     
       ####################################################################################
