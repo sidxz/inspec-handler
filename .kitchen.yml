@@ -21,7 +21,8 @@ platforms:
 suites:
   - name: default
     run_list:
-      - recipe[inspec_handler::default]
+      # - recipe[inspec_handler::default]
+      - recipe[inspec_handler::utils]
     verifier:
       inspec_tests:
         - test/smoke/default
