@@ -18,5 +18,8 @@ inspec_handler "inspec_tests" do
   test_environment              node['inspec_handler']['test_environment']
   production_environment        node['inspec_handler']['production_environment']
   action :nothing
-  delayed_action  node['inspec_handler']['action']
+end
+
+log 'execute' do
+  notifies node['inspec_handler']['action'], 'inspec_handler[inspec_tests]', :delayed
 end
