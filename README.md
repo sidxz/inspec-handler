@@ -56,7 +56,7 @@ This cookbook also provides helper utils
 ## Ensure that the inspec handler cookbook is the last one to be run
 We recommend to implement this using a wrapper cookbook.
 Add the following resource 
-```
+```ruby
 inspec_handler_utils do
   ensure_last true
   action :hard
@@ -69,13 +69,13 @@ where
 An example wrapper cookbook :
 `cookbook name` coe-inspec-handler
 file metadata.rb
-```
+```ruby
 name 'coe-inspec-handler'
 <other params>
 depends "inspec_handler"
 ```
 file recipe/default.rb
-```
+```ruby
 inspec_handler_utils "inutil" do
   ensure_last true
   action :hard

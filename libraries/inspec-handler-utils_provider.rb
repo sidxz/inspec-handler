@@ -51,9 +51,12 @@ class Chef
         @_string_warning = "[/!\\]"
         @_string_fail = "[--FAIL--]"
         @_string_fatal = "[--FATAL--]"
+        @_string_focus = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 
         #is_at_end
+        @_string_is_at_end_skip = "Skipping property ensure_last. To make sure this cookbook runs last, set ensure_last to true "
         @_string_is_at_end_error = "#{cookbook_name} is NOT placed at the end of your runlist. Make sure this cookbook runs last."
+        @_string_is_at_end_name_of_wrapper = "inspec_handler::default is expected to be wrapped in #{cookbook_name}"
       end
 
       ####################################################################################
@@ -73,14 +76,18 @@ class Chef
       ####################################################################################
       def utils(raise_on_fail)
 
-        if @current_resource.ensure_last then is_at_end? (raise_on_fail) end
+        if @current_resource.ensure_last 
+          is_at_end? (raise_on_fail)
+        else
+          Chef::Log.warn("#{@_string_mod_name} #{@_string_warning} #{@_string_is_at_end_skip}")
+        end
         
       end
 
       def is_at_end? (raise_on_fail)
-        Chef::Log.warn("NAME OF WRAPPER COOKBOOK : #{cookbook_name}")
+        Chef::Log.warn("#{@_string_mod_name} #{@_string_warning} #{@_string_is_at_end_name_of_wrapper}")
         if !node["expanded_run_list"].last.include? cookbook_name
-          if raise_on_fail then raise "#{@_string_mod_name} #{@_string_fatal} #{@_string_is_at_end_error}" end
+          if raise_on_fail then raise "#{@_string_mod_name} #{@_string_fatal}\n#{@_string_focus}\n#{@_string_focus}\n@ #{@_string_is_at_end_error} @\n#{@_string_focus}\n#{@_string_focus}" end
           if !raise_on_fail then Chef::Log.warn("#{@_string_mod_name} #{@_string_warning} #{@_string_is_at_end_error}") end
         end
         return true
