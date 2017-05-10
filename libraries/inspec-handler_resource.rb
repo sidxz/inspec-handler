@@ -50,6 +50,7 @@ class Chef
        #test_environment : If defined will restrict the inspec handler to run only in the defined test environments.
        #production_environment : defines your production environment in which inspec_handler will run only if there
        #           is a change in the runlist. If this is not set, all the inspec_tests are run on each chef-client run.
+       #track_attributes : Look for changes in attributes to trigger tests in production environment.
        #abort_on_fail : Will skip further tests if one of the test fails
        #
        ##
@@ -62,6 +63,7 @@ class Chef
        @enforced = true
        @production_environment = nil
        @abort_on_fail = true
+       @track_attributes = true
      end
 
      #Methods to get and set attributes
@@ -103,6 +105,10 @@ class Chef
 
      def abort_on_fail(arg=nil)
        set_or_return(:abort_on_fail, arg, :kind_of => [TrueClass, FalseClass])
+     end
+
+     def track_attributes(arg=nil)
+       set_or_return(:track_attributes, arg, :kind_of => [TrueClass, FalseClass])
      end
 
     end
