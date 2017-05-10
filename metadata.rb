@@ -5,7 +5,7 @@ license 'all_rights'
 description 'Installs/Configures inspec_handler'
 long_description 'Installs/Configures inspec_handler'
 
-version '1.2.3'
+version '1.2.4'
 
 
 # The `issues_url` points to the location where issues for this cookbook are

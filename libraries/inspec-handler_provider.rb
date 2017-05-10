@@ -47,6 +47,7 @@ class Chef
         @current_resource.test_environment(new_resource.test_environment)
         @current_resource.production_environment(new_resource.production_environment)
         @current_resource.abort_on_fail(new_resource.abort_on_fail)
+        @current_resource.track_attributes(new_resource.track_attributes)
         _string_builder()
       end
 
@@ -61,7 +62,7 @@ class Chef
         @_string_fatal = "[--FATAL--]"
 
         # Funcrion run_tests
-        @_string_production_filter = "[No Change in RunList] Filter: Production Environment is set. Skipping Tests. "
+        @_string_production_filter = "[No Change Detected] [Skipping test] Production Environment Filter is set. Will run tests only when something changes. "
         @_string_test_env_filter   = "[#{node.chef_environment} not in test environment set] Filter : Test Environment is set. Skipping Tests "
         @_string_start_time = "[Testing Started At #{Time.new.strftime('%c')}] "
         @_string_rescue_on_abort = "Further testing has been aborted. To change this behavior, modify property 'abort_on_fail' to false."
@@ -73,6 +74,8 @@ class Chef
         @_string_kitchen = "[Test Kitchen Detected] Will parse /tmp/chef/dna.json to create runlist"
         #Function diff_run_list?
         @_string_diff_run_list = "[Runlist Changed] Runlist has been modified or a cookbook has changed its version."
+        #Function diff_attributes?
+        @_string_diff_attr_list = "[Attributes Changed] One or more attributes have been modified."
         #Function run_at_prod?
         @_string_last_fail ="[Fail detected in last run] Will Override Production Filter "
       end
@@ -315,6 +318,7 @@ class Chef
         gen_runlist = "#{cookbooks.keys.map {|x| cookbooks[x].name + ' ' + cookbooks[x].version}} #{testStack.to_s}"
         if !gen_runlist.eql? cache_content then 
           cache.close
+          ::FileUtils.cp("/var/lib/inspec_handler/cache/runlist", "/var/lib/inspec_handler/cache/runlist.old")
           cache = ::File.open("/var/lib/inspec_handler/cache/runlist", ::File::RDWR | ::File::TRUNC | ::File::CREAT, 750)
           cache.write(gen_runlist)
           Chef::Log.warn("#{@_string_mod_name} #{@_string_diff_run_list}")
@@ -324,6 +328,30 @@ class Chef
           return false
         end
       end
+
+      ##
+      #
+      # Track change in attributes
+      #
+      ##
+      def diff_attributes?
+        ::FileUtils.mkdir_p("/var/lib/inspec_handler/cache/") unless ::File.directory?("/var/lib/inspec_handler/cache/")
+        cache = ::File.open("/var/lib/inspec_handler/cache/attributes", ::File::RDWR | ::File::CREAT, 750)
+        cache_content = cache.read
+        gen_attr = "Default=> #{node.default.to_s} Override=> #{node.override.to_s}"
+        if !gen_attr.eql? cache_content then 
+          cache.close
+          ::FileUtils.cp("/var/lib/inspec_handler/cache/attributes", "/var/lib/inspec_handler/cache/attributes.old")
+          cache = ::File.open("/var/lib/inspec_handler/cache/attributes", ::File::RDWR | ::File::TRUNC | ::File::CREAT, 750)
+          cache.write(gen_attr)
+          Chef::Log.warn("#{@_string_mod_name} #{@_string_diff_attr_list}")
+          cache.close
+          return true
+        else
+          return false
+        end
+      end
+
 
       ##
       #
@@ -347,7 +375,7 @@ class Chef
         if (is_at_prod? && node.normal['inspec_handler_last_success'] == false)
           Chef::Log.warn("#{@_string_mod_name} #{@_string_warning} #{@_string_last_fail}")
         end
-        if ((is_at_prod?) && ((node.normal['inspec_handler_last_success'] == false) || (diff_run_list?(testStack))))
+        if ((is_at_prod?) && ((node.normal['inspec_handler_last_success'] == false) || (diff_run_list?(testStack)) || (@current_resource.track_attributes == true && diff_attributes?)))
             return true
           else
             return false
