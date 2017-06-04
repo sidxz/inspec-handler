@@ -65,7 +65,7 @@ inspec_handler_utils do
 end
 ```
 where
-* __ensure_last__ will ensure that the tests are being run at the last step of convergence
+* __ensure_last__ Enforce a restriction to bound developers to put this at end of run_list
 * __:action__ (:hard, :soft) :hard will fail the chef-client if one of the property fails. :soft will only generate warning
 
 An example wrapper cookbook :
